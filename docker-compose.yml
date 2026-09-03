@@ -1,0 +1,20 @@
+services:
+  whatsapp:
+    build: .
+    container_name: whatsapp-android
+    restart: unless-stopped
+    ports:
+      - "6080:6080"
+    devices:
+      - /dev/kvm:/dev/kvm
+    environment:
+      WHATSAPP_UPDATE_ON_START: "false"
+      # Optional override if WhatsApp changes its direct-download endpoint:
+      # WHATSAPP_APK_URL: "https://.../WhatsApp.apk"
+    volumes:
+      - android-data:/root/.android
+      - whatsapp-cache:/opt/whatsapp/cache
+
+volumes:
+  android-data:
+  whatsapp-cache:
