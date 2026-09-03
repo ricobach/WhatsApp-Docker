@@ -26,7 +26,7 @@ RUN yes | sdkmanager --licenses >/dev/null \
     && sdkmanager --install \
        "platform-tools" \
        "emulator" \
-       "system-images;android-34;google_apis;x86_64"
+       "system-images;android-36;google_apis;x86_64"
 
 COPY entrypoint.sh /opt/whatsapp/entrypoint.sh
 RUN chmod +x /opt/whatsapp/entrypoint.sh
