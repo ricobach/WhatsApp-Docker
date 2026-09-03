@@ -4,7 +4,8 @@ Experimental Docker setup that runs an Android emulator with WhatsApp and expose
 
 ## What it does
 
-- Runs an Android 14 (API 34) x86_64 emulator inside Docker.
+- Runs an Android 16 (API 36) x86_64 emulator inside Docker.
+- Uses the `google_apis` system image, not the Google Play Store image.
 - Uses `/dev/kvm` when available for hardware acceleration.
 - Exposes the Android screen through noVNC on port `6080`.
 - Downloads the WhatsApp APK on first start instead of storing the APK in Git.
@@ -40,6 +41,16 @@ http://<docker-host>:6080/vnc.html
 ```
 
 Complete the WhatsApp setup interactively in the Android emulator.
+
+## Android image
+
+The container currently installs and creates this Android system image:
+
+```text
+system-images;android-36;google_apis;x86_64
+```
+
+This provides Android 16 / API 36 with Google APIs, but without the Google Play Store.
 
 ## WhatsApp APK download
 
@@ -90,7 +101,7 @@ Do **not** delete `android-data` unless you intentionally want to reset the emul
 
 ## Architecture warning
 
-The initial image uses Google's `x86_64` Android emulator image because this provides good performance with KVM on normal x86 Linux servers.
+The image uses Google's `x86_64` Android emulator image because this provides good performance with KVM on normal x86 Linux servers.
 
 Whether the current WhatsApp APK installs successfully on that ABI must be tested with the current WhatsApp release. If Meta distributes an ARM-only build through the direct-download channel, the next iteration should either:
 
