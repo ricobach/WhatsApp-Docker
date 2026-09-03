@@ -28,12 +28,12 @@ x11vnc -display "${DISPLAY_NUM}" -forever -nopw -quiet -rfbport 5900 \
   -afteraccept "adb shell monkey -p ${WHATSAPP_PACKAGE} -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1 || true" &
 websockify --web=/usr/share/novnc 6080 localhost:5900 &
 
-log "Ensuring Android virtual device exists..."
+log "Ensuring Android 16 virtual device exists..."
 if [ ! -d "${HOME}/.android/avd/${AVD_NAME}.avd" ]; then
   echo "no" | avdmanager create avd \
     --force \
     --name "${AVD_NAME}" \
-    --package "system-images;android-34;google_apis;x86_64" \
+    --package "system-images;android-36;google_apis;x86_64" \
     --device "pixel_6"
 fi
 
@@ -52,7 +52,7 @@ else
   log "WARNING: /dev/kvm not available; emulator will use slow software emulation."
 fi
 
-log "Booting Android emulator..."
+log "Booting Android 16 emulator..."
 # shellcheck disable=SC2086
 emulator -avd "${AVD_NAME}" -no-audio -no-boot-anim -no-snapshot ${ACCEL_FLAGS} &
 EMULATOR_PID=$!
@@ -62,7 +62,7 @@ until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1"
   kill -0 "${EMULATOR_PID}" 2>/dev/null || { log "Android emulator exited unexpectedly"; exit 1; }
   sleep 2
 done
-log "Android boot complete."
+log "Android 16 boot complete."
 
 resolve_whatsapp_url() {
   if [ -n "${WHATSAPP_APK_URL:-}" ]; then
@@ -70,7 +70,6 @@ resolve_whatsapp_url() {
     return 0
   fi
 
-  # Official WhatsApp direct-download endpoint. curl follows redirects to the current CDN artifact.
   printf '%s\n' "https://www.whatsapp.com/android/current/WhatsApp.apk"
 }
 
@@ -79,10 +78,9 @@ download_whatsapp() {
   url="$(resolve_whatsapp_url)"
   log "Downloading current WhatsApp APK from the official WhatsApp download endpoint..."
   curl -fL --retry 3 --retry-delay 2 \
-    -A 'Mozilla/5.0 (Linux; Android 14)' \
+    -A 'Mozilla/5.0 (Linux; Android 16)' \
     -o "${APK_PATH}.tmp" "${url}"
 
-  # A valid APK is a ZIP archive and starts with PK. This catches HTML/error pages returned with HTTP 200.
   if [ "$(head -c 2 "${APK_PATH}.tmp" 2>/dev/null || true)" != "PK" ]; then
     rm -f "${APK_PATH}.tmp"
     log "ERROR: downloaded file is not an APK. Set WHATSAPP_APK_URL to an official APK URL and restart."
@@ -104,7 +102,6 @@ else
   log "WhatsApp is already installed in the persistent Android volume."
 fi
 
-# WhatsApp has its own updater. Optional container-side update check can be requested on every boot.
 if [ "${WHATSAPP_UPDATE_ON_START:-false}" = "true" ]; then
   download_whatsapp
   log "Attempting WhatsApp update..."
@@ -116,7 +113,7 @@ adb shell monkey -p "${WHATSAPP_PACKAGE}" -c android.intent.category.LAUNCHER 1 
 
 cat <<EOF
 ============================================================
- WhatsApp Android emulator is running.
+ WhatsApp Android 16 emulator is running.
 
  noVNC:  http://<docker-host>:${NOVNC_PORT:-6080}/vnc.html
  Package: ${WHATSAPP_PACKAGE}
